@@ -1,0 +1,72 @@
+{
+  "name": "mpp-spl",
+  "version": "0.1.0",
+  "description": "SPL Token + Pump.fun payment layer for the Machine Payments Protocol",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    },
+    "./registry": {
+      "types": "./dist/registry.d.ts",
+      "default": "./dist/registry.js"
+    },
+    "./price": {
+      "types": "./dist/price/index.d.ts",
+      "default": "./dist/price/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@solana/kit": ">=6.5.0",
+    "@solana/mpp": ">=0.2.0",
+    "mppx": ">=0.3.15"
+  },
+  "peerDependenciesMeta": {
+    "@solana/mpp": {
+      "optional": false
+    },
+    "mppx": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@solana/kit": "^6.5.0",
+    "@solana/mpp": "^0.2.0",
+    "mppx": "^0.4.11",
+    "tsup": "^8.4.0",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.2"
+  },
+  "keywords": [
+    "solana",
+    "mpp",
+    "spl",
+    "pump.fun",
+    "payments",
+    "ai-agents",
+    "402"
+  ],
+  "author": "nullxnothing",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nullxnothing/mpp-spl.git"
+  }
+}
