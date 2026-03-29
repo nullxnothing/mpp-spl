@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="./banner.png" alt="mpp-spl banner" width="100%" />
+</p>
+
+<p align="center">
   <h1 align="center">mpp-spl</h1>
   <p align="center">Accept any Solana token as payment in your API — including pump.fun tokens that just launched.</p>
 </p>
