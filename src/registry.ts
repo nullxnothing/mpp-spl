@@ -48,6 +48,13 @@ const BUILTIN_TOKENS: TokenEntry[] = [
     program: 'spl',
   },
   {
+    symbol: 'NEIRO',
+    name: 'Neiro (BROPUMP)',
+    mint: 'CTg3ZgYx79zrE1MteDVkmkcGniiFrK1hJ6yiabropump',
+    decimals: 6,
+    program: 'spl',
+  },
+  {
     symbol: 'WIF',
     name: 'dogwifhat',
     mint: 'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm',

@@ -1,5 +1,5 @@
 /**
- * Express server gated with MPP — accepts BONK, WIF, USDC, or a pump.fun token.
+ * Express server gated with MPP — accepts NEIRO, WIF, USDC, or a pump.fun token.
  *
  * Usage:
  *   npx tsx examples/express-server.ts
@@ -26,27 +26,27 @@ const RECIPIENT = process.env.RECIPIENT_PUBKEY!;
 const HELIUS_RPC = process.env.HELIUS_RPC_URL;
 const JUPITER_KEY = process.env.JUPITER_API_KEY;
 
-// ── 1. BONK-gated endpoint ($0.01 per request) ──
+// ── 1. NEIRO-gated endpoint ($0.01 per request) ──
 
-const bonkConfig = await resolveChargeConfig({
-  token: 'BONK',
+const neiroConfig = await resolveChargeConfig({
+  token: 'NEIRO',
   recipient: RECIPIENT,
   usdAmount: 0.01,
   jupiterApiKey: JUPITER_KEY,
 });
 
-const bonkMppx = Mppx.create({
+const neiroMppx = Mppx.create({
   secretKey: process.env.MPP_SECRET_KEY!,
   methods: [solana.charge({
-    ...buildSolanaChargeParams(bonkConfig),
+    ...buildSolanaChargeParams(neiroConfig),
     rpcUrl: HELIUS_RPC,
   })],
 });
 
-app.get('/api/bonk-data', async (req, res) => {
-  const result = await bonkMppx.charge({
-    amount: bonkConfig.amount,
-    currency: bonkConfig.currency,
+app.get('/api/neiro-data', async (req, res) => {
+  const result = await neiroMppx.charge({
+    amount: neiroConfig.amount,
+    currency: neiroConfig.currency,
   })(req as unknown as Request);
 
   if (result.status === 402) {
@@ -55,7 +55,7 @@ app.get('/api/bonk-data', async (req, res) => {
   }
 
   const response = result.withReceipt(
-    Response.json({ message: 'Paid with BONK!', price: bonkConfig.displayAmount }),
+    Response.json({ message: 'Paid with NEIRO!', price: neiroConfig.displayAmount }),
   );
   res.status(200).json(await response.json());
 });
@@ -141,7 +141,7 @@ app.get('/api/pumpfun-gated', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`MPP server running on http://localhost:${PORT}`);
-  console.log(`  BONK endpoint:    GET /api/bonk-data (${bonkConfig.displayAmount})`);
+  console.log(`  NEIRO endpoint:    GET /api/neiro-data (${neiroConfig.displayAmount})`);
   console.log(`  USDC endpoint:    GET /api/premium (1.00 USDC)`);
   console.log(`  PumpFun endpoint: GET /api/pumpfun-gated ($0.01 in MYTOKEN)`);
 });

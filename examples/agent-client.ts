@@ -45,13 +45,13 @@ const mppx = Mppx.create({
 });
 
 // Make a paid API call — 402 is handled transparently
-const response = await mppx.fetch('https://api.example.com/api/bonk-data');
+const response = await mppx.fetch('https://api.example.com/api/neiro-data');
 const data = await response.json();
 console.log('Response:', data);
 
 // Make multiple calls — agent pays each one
 for (let i = 0; i < 5; i++) {
-  const res = await mppx.fetch('https://api.example.com/api/bonk-data');
+  const res = await mppx.fetch('https://api.example.com/api/neiro-data');
   console.log(`Call ${i + 1}:`, res.status, await res.json());
 }
 

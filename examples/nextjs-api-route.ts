@@ -13,7 +13,7 @@ import { Mppx, solana } from '@solana/mpp/server';
 import { resolveChargeConfig, buildSolanaChargeParams } from 'mpp-spl';
 
 const config = await resolveChargeConfig({
-  token: 'BONK',
+  token: 'NEIRO',
   recipient: process.env.RECIPIENT_PUBKEY!,
   usdAmount: 0.01,
   jupiterApiKey: process.env.JUPITER_API_KEY,

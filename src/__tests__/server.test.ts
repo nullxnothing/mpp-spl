@@ -117,6 +117,28 @@ describe('resolveChargeConfig', () => {
     expect(config.price).toBeNull();
   });
 
+  it('resolves NEIRO BROPUMP pricing and SPL payment parameters', async () => {
+    const fetchSpy = mockFetch(0.001, 6);
+    const mint = 'CTg3ZgYx79zrE1MteDVkmkcGniiFrK1hJ6yiabropump';
+
+    const config = await resolveChargeConfig({
+      token: 'nEiRo',
+      recipient: RECIPIENT,
+      usdAmount: 0.01,
+    });
+
+    expect(fetchSpy.mock.calls[0][0].toString()).toContain(mint);
+    expect(getToken(mint)).toBe(getToken('NEIRO'));
+    expect(config.amount).toBe('10000000'); // 10 NEIRO at an illustrative $0.001
+    expect(config.displayAmount).toContain('NEIRO');
+    expect(buildSolanaChargeParams(config)).toEqual({
+      recipient: RECIPIENT,
+      currency: mint,
+      decimals: 6,
+      tokenProgram: TOKEN_PROGRAM,
+    });
+  });
+
   it('usdAmount mode fetches price and converts correctly', async () => {
     // Mock USDC at $1.00
     mockFetch(1.0, 6);

@@ -19,9 +19,9 @@
 
 [MPP](https://mpp.dev) (Machine Payments Protocol) is a new standard that lets APIs charge for access using the HTTP `402 Payment Required` flow. Think of it like a toll booth for API calls — an AI agent hits your endpoint, gets a "please pay" response, sends a Solana transaction, and gets the data back. No API keys, no credit cards, no humans involved.
 
-The official [`@solana/mpp`](https://github.com/solana-foundation/mpp-sdk) SDK handles the payment plumbing, but it only speaks raw token amounts. It doesn't know that BONK has 5 decimals, can't convert "$0.01 worth of BONK" into the right number, and has zero support for pump.fun tokens that haven't graduated to a DEX yet.
+The official [`@solana/mpp`](https://github.com/solana-foundation/mpp-sdk) SDK handles the payment plumbing, but it only speaks raw token amounts. It doesn't know that NEIRO has 6 decimals, can't convert "$0.01 worth of NEIRO" into the right number, and has zero support for pump.fun tokens that haven't graduated to a DEX yet.
 
-**`mpp-spl` bridges that gap.** You tell it "charge $0.01 in BONK" and it handles the rest — token lookup, price feed, decimal math, and formatting. For pump.fun tokens, it reads the bonding curve directly on-chain since Jupiter has no data for pre-graduation tokens.
+**`mpp-spl` bridges that gap.** You tell it "charge $0.01 in NEIRO" and it handles the rest — token lookup, price feed, decimal math, and formatting. For pump.fun tokens, it reads the bonding curve directly on-chain since Jupiter has no data for pre-graduation tokens.
 
 ## Install
 
@@ -31,15 +31,17 @@ npm i mpp-spl @solana/mpp @solana/kit mppx
 
 ## Quick Start
 
-### Charge $0.01 in BONK per API call
+### Charge $0.01 in NEIRO per API call
+
+`NEIRO` refers to [NEIRO BROPUMP](https://bropump.com/) on Solana: mint [`CTg3ZgYx79zrE1MteDVkmkcGniiFrK1hJ6yiabropump`](https://solscan.io/token/CTg3ZgYx79zrE1MteDVkmkcGniiFrK1hJ6yiabropump), 6 decimals, standard SPL Token program.
 
 ```ts
 import { Mppx, solana } from '@solana/mpp/server'
 import { resolveChargeConfig, buildSolanaChargeParams } from 'mpp-spl'
 
-// "I want to charge $0.01 in BONK" — mpp-spl figures out the rest
+// "I want to charge $0.01 in NEIRO" — mpp-spl figures out the rest
 const config = await resolveChargeConfig({
-  token: 'BONK',
+  token: 'NEIRO',
   recipient: 'YourWalletPubkey...',
   usdAmount: 0.01,
 })
@@ -105,13 +107,15 @@ const response = await mppx.fetch('https://api.example.com/paid-endpoint')
 
 ## How it works
 
+The $0.001 price below is illustrative, not a live quote.
+
 ```
-You: "Charge $0.01 in BONK"
+You: "Charge $0.01 in NEIRO"
 
 mpp-spl:
-  1. Looks up BONK → mint address, 5 decimals, SPL program
-  2. Fetches price from Jupiter ($0.00001234 per BONK)
-  3. Calculates: $0.01 / $0.00001234 = 810.37 BONK = 81037 base units
+  1. Looks up NEIRO → mint address, 6 decimals, SPL program
+  2. Fetches price from Jupiter ($0.001 per NEIRO)
+  3. Calculates: $0.01 / $0.001 = 10 NEIRO = 10000000 base units
   4. Returns everything @solana/mpp needs to create the charge
 
 For pump.fun tokens (not on Jupiter yet):
@@ -124,13 +128,13 @@ For pump.fun tokens (not on Jupiter yet):
 
 ### Token Registry
 
-A map of known tokens. Comes with 10 built-in (USDC, USDT, SOL, BONK, WIF, JUP, PYUSD, RAY, POPCAT, MEW). Add your own at runtime.
+A map of known tokens. Comes with 11 built-in (USDC, USDT, SOL, BONK, NEIRO, WIF, JUP, PYUSD, RAY, POPCAT, MEW). Add your own at runtime.
 
 ```ts
 import { getToken, registerToken, getAllTokens } from 'mpp-spl/registry'
 
-getToken('BONK')           // look up by symbol (case-insensitive)
-getToken('DezXAZ8z...')    // look up by mint address
+getToken('NEIRO')           // look up by symbol (case-insensitive)
+getToken('CTg3ZgYx79zrE1MteDVkmkcGniiFrK1hJ6yiabropump')    // look up by mint address
 registerToken({ ... })     // add a new token
 getAllTokens()              // list everything registered
 ```
@@ -144,10 +148,11 @@ import { resolvePrice, createPriceResolver } from 'mpp-spl/price'
 
 // One-shot: tries Jupiter, falls back to pump.fun bonding curve
 const price = await resolvePrice({
-  mint: 'DezXAZ8z...',
+  mint: 'CTg3ZgYx79zrE1MteDVkmkcGniiFrK1hJ6yiabropump',
   heliusRpcUrl: process.env.HELIUS_RPC_URL,
 })
-// -> { usdPerToken: 0.00001234, decimals: 5, source: 'jupiter' }
+// Illustrative response (not a live quote):
+// -> { usdPerToken: 0.001, decimals: 6, source: 'jupiter' }
 
 // Reusable (shared cache, better for multiple lookups)
 const resolver = createPriceResolver({
@@ -166,8 +171,8 @@ await resolver.getPrice(mint)
 ```ts
 import { usdToBaseUnits, baseUnitsToUsd } from 'mpp-spl/price'
 
-usdToBaseUnits(0.01, 0.00001234, 5)   // -> "81037" (string, BigInt safe)
-baseUnitsToUsd('81037', 0.00001234, 5) // -> ~0.01
+usdToBaseUnits(0.01, 0.001, 6)   // -> "10000000" (string, BigInt safe)
+baseUnitsToUsd('10000000', 0.001, 6) // -> ~0.01
 ```
 
 ### Charge Config Resolver
@@ -178,10 +183,10 @@ The main helper. One call that gives you everything `@solana/mpp` needs.
 import { resolveChargeConfig, buildSolanaChargeParams } from 'mpp-spl/server'
 
 const config = await resolveChargeConfig({
-  token: 'BONK',            // symbol or mint address
+  token: 'NEIRO',            // symbol or mint address
   recipient: 'pubkey...',   // wallet that gets paid
   usdAmount: 0.01,          // dollar amount (price adjusts per request)
-  // OR: tokenAmount: '83400' // fixed token amount (no price lookup)
+  // OR: tokenAmount: '10000000' // 10 NEIRO in base units (no price lookup)
   heliusRpcUrl: '...',      // needed for pump.fun tokens
   jupiterApiKey: '...',     // optional, helps with rate limits
 })
@@ -250,7 +255,7 @@ Zero runtime dependencies. All external packages are peer deps.
 
 | File | What it shows |
 |------|--------------|
-| [`express-server.ts`](examples/express-server.ts) | Accept BONK, USDC, and a pump.fun token in one server |
+| [`express-server.ts`](examples/express-server.ts) | Accept NEIRO, USDC, and a pump.fun token in one server |
 | [`nextjs-api-route.ts`](examples/nextjs-api-route.ts) | Next.js App Router pattern |
 | [`agent-client.ts`](examples/agent-client.ts) | AI agent that pays for API calls automatically |
 | [`pumpfun-launch.ts`](examples/pumpfun-launch.ts) | Launch token, register it, gate your API, go |
